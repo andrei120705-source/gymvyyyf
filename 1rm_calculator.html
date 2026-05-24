@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор 1ПМ и Повторений</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        /* Светлая тема */
+        body {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd, #7dd3fc); 
+            color: #0f172a; 
+        }
+        /* Темная тема */
+        .dark body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #f8fafc; 
+        }
+        
+        .glass-card {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.3s ease;
+        }
+        /* Карточки - светлая тема */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        /* Карточки - темная тема */
+        .dark .glass-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Убираем стрелочки в input type="number" */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
+        .highlight-text {
+            background: linear-gradient(to right, #059669, #0891b2); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dark .highlight-text {
+            background: linear-gradient(to right, #34d399, #22d3ee); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center justify-center relative">
+
+    <!-- Кнопка переключения темы -->
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-50">
+        <button id="theme-toggle" class="p-3 rounded-full bg-white/50 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/40 backdrop-blur-md border border-white/50 dark:border-white/10 shadow-lg transition-all text-slate-800 dark:text-white flex items-center justify-center">
+            <!-- Иконка солнца (для светлой темы) -->
+            <svg id="theme-toggle-light-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            <!-- Иконка луны (для темной темы) -->
+            <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        </button>
+    </div>
+
+    <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 mt-16 md:mt-0">
+        
+        <!-- Панель ввода данных -->
+        <div class="glass-card rounded-3xl p-8 lg:col-span-5 flex flex-col gap-6 relative overflow-hidden">
+            <!-- Декоративный элемент -->
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-emerald-400 dark:bg-emerald-500 opacity-40 dark:opacity-20 blur-2xl transition-all"></div>
+            
+            <div class="z-10">
+                <h1 class="text-3xl font-extrabold highlight-text mb-2" id="main-title">Калькулятор 1ПМ</h1>
+                <p class="text-sm text-slate-600 dark:text-gray-300 transition-colors" id="main-subtitle">Узнайте свой одноповторный максимум на основе веса и количества повторений.</p>
+            </div>
+
+            <div class="z-10">
+                <!-- Табы для переключения режимов -->
+                <div class="flex bg-slate-200/50 dark:bg-slate-800/50 rounded-xl p-1 mb-2 relative">
+                    <button id="tab-1rm" class="flex-1 py-2 text-sm font-medium rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white transition-all">Узнать 1ПМ</button>
+                    <button id="tab-reps" class="flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-gray-200 transition-all">Узнать повторения</button>
+                </div>
+            </div>
+
+            <!-- РЕЖИМ 1: Расчет 1ПМ -->
+            <div id="mode-1-inputs" class="space-y-5 z-10">
+                <div class="group">
+                    <label for="weight" class="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 transition-colors">Вес отягощения</label>
+                    <div class="relative">
+                        <input type="number" id="weight" min="1" step="0.5" 
+                               class="w-full bg-white/70 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl py-3 px-4 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-lg shadow-inner placeholder-slate-400" 
+                               placeholder="Например, 100">
+                        <select id="unit-1" class="absolute inset-y-0 right-0 bg-transparent border-none text-slate-500 dark:text-gray-400 py-3 px-4 focus:outline-none cursor-pointer hover:text-slate-800 dark:hover:text-white transition-colors appearance-none font-medium">
+                            <option value="kg" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">кг</option>
+                            <option value="lbs" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">фунты</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label for="reps" class="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 transition-colors">Количество повторений (1-20)</label>
+                    <input type="number" id="reps" min="1" max="20" 
+                           class="w-full bg-white/70 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl py-3 px-4 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-lg shadow-inner placeholder-slate-400" 
+                           placeholder="Например, 5">
+                    
+                    <div id="reps-warning" class="mt-3 flex items-start gap-2 text-amber-600 dark:text-yellow-400 text-sm hidden bg-amber-100/50 dark:bg-yellow-400/10 p-3 rounded-lg border border-amber-200 dark:border-yellow-400/20 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span>При 1 повторении введенный вес и есть ваш 1ПМ.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- РЕЖИМ 2: Расчет повторений -->
+            <div id="mode-2-inputs" class="space-y-5 z-10 hidden">
+                <div class="group">
+                    <label for="max-weight" class="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 transition-colors">Ваш 1ПМ (Максимум)</label>
+                    <div class="relative">
+                        <input type="number" id="max-weight" min="1" step="0.5" 
+                               class="w-full bg-white/70 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl py-3 px-4 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-lg shadow-inner placeholder-slate-400" 
+                               placeholder="Например, 120">
+                        <select id="unit-2" class="absolute inset-y-0 right-0 bg-transparent border-none text-slate-500 dark:text-gray-400 py-3 px-4 focus:outline-none cursor-pointer hover:text-slate-800 dark:hover:text-white transition-colors appearance-none font-medium">
+                            <option value="kg" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">кг</option>
+                            <option value="lbs" class="bg-white dark:bg-slate-800 text-slate-800 dark:text-white">фунты</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="group">
+                    <label for="target-weight" class="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2 transition-colors">Желаемый рабочий вес</label>
+                    <input type="number" id="target-weight" min="1" step="0.5" 
+                           class="w-full bg-white/70 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-600 rounded-xl py-3 px-4 text-slate-800 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-lg shadow-inner placeholder-slate-400" 
+                           placeholder="Например, 100">
+                    
+                    <div id="target-warning" class="mt-3 flex items-start gap-2 text-amber-600 dark:text-yellow-400 text-sm hidden bg-amber-100/50 dark:bg-yellow-400/10 p-3 rounded-lg border border-amber-200 dark:border-yellow-400/20 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Рабочий вес больше или равен вашему максимуму. Вы сможете сделать 1 повторение.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-8 border-t border-slate-300/50 dark:border-white/10 text-center z-10 transition-colors">
+                <p id="average-label" class="text-sm font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2 transition-colors">Средний 1ПМ</p>
+                <div class="flex justify-center items-end gap-2">
+                    <span id="average-result" class="text-6xl font-black text-slate-800 dark:text-white leading-none transition-colors">0</span>
+                    <span class="text-2xl text-emerald-600 dark:text-emerald-400 font-bold mb-1 transition-colors" id="result-unit">кг</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель результатов -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- Таблица по формулам -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 rounded-full bg-cyan-400 dark:bg-cyan-500 opacity-40 dark:opacity-20 blur-2xl transition-all"></div>
+                <h2 class="text-xl font-bold mb-5 flex items-center gap-2 z-10 relative text-slate-800 dark:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-600 dark:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Результаты по формулам
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 z-10 relative">
+                    <div class="bg-white/40 dark:bg-white/5 p-4 rounded-2xl border border-white/60 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors shadow-sm dark:shadow-none">
+                        <div class="text-slate-500 dark:text-gray-400 text-sm mb-1 transition-colors">Формула Эпли</div>
+                        <div class="text-2xl font-bold text-slate-800 dark:text-white transition-colors"><span id="res-epley">0.0</span> <span class="text-sm font-normal text-slate-400 dark:text-gray-500 formula-unit transition-colors">кг</span></div>
+                    </div>
+                    <div class="bg-white/40 dark:bg-white/5 p-4 rounded-2xl border border-white/60 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors shadow-sm dark:shadow-none">
+                        <div class="text-slate-500 dark:text-gray-400 text-sm mb-1 transition-colors">Формула Бржицкого</div>
+                        <div class="text-2xl font-bold text-slate-800 dark:text-white transition-colors"><span id="res-brzycki">0.0</span> <span class="text-sm font-normal text-slate-400 dark:text-gray-500 formula-unit transition-colors">кг</span></div>
+                    </div>
+                    <div class="bg-white/40 dark:bg-white/5 p-4 rounded-2xl border border-white/60 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors shadow-sm dark:shadow-none">
+                        <div class="text-slate-500 dark:text-gray-400 text-sm mb-1 transition-colors">Формула Ландера</div>
+                        <div class="text-2xl font-bold text-slate-800 dark:text-white transition-colors"><span id="res-lander">0.0</span> <span class="text-sm font-normal text-slate-400 dark:text-gray-500 formula-unit transition-colors">кг</span></div>
+                    </div>
+                    <div class="bg-white/40 dark:bg-white/5 p-4 rounded-2xl border border-white/60 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors shadow-sm dark:shadow-none">
+                        <div class="text-slate-500 dark:text-gray-400 text-sm mb-1 transition-colors">Формула О'Коннора</div>
+                        <div class="text-2xl font-bold text-slate-800 dark:text-white transition-colors"><span id="res-oconnor">0.0</span> <span class="text-sm font-normal text-slate-400 dark:text-gray-500 formula-unit transition-colors">кг</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Таблица рабочих процентов -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 flex-grow relative overflow-hidden">
+                <h2 class="text-xl font-bold mb-5 flex items-center gap-2 z-10 relative text-slate-800 dark:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                    </svg>
+                    Рабочие веса от 1ПМ
+                </h2>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 z-10 relative" id="percentages-container">
+                    <!-- Заполняется через JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // === ТЕМА (Светлая/Темная) ===
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            lightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            darkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        });
+
+        // === ЛОГИКА КАЛЬКУЛЯТОРА ===
+        let currentMode = '1rm'; // '1rm' или 'reps'
+        let currentUnit = 'kg';
+
+        // Элементы UI (Табы)
+        const tab1rm = document.getElementById('tab-1rm');
+        const tabReps = document.getElementById('tab-reps');
+        const mode1Inputs = document.getElementById('mode-1-inputs');
+        const mode2Inputs = document.getElementById('mode-2-inputs');
+        
+        // Текстовки
+        const mainTitle = document.getElementById('main-title');
+        const mainSubtitle = document.getElementById('main-subtitle');
+        const avgLabel = document.getElementById('average-label');
+        
+        // Инпуты (Режим 1)
+        const weightInput = document.getElementById('weight');
+        const repsInput = document.getElementById('reps');
+        const unit1Select = document.getElementById('unit-1');
+        const repsWarning = document.getElementById('reps-warning');
+        
+        // Инпуты (Режим 2)
+        const maxWeightInput = document.getElementById('max-weight');
+        const targetWeightInput = document.getElementById('target-weight');
+        const unit2Select = document.getElementById('unit-2');
+        const targetWarning = document.getElementById('target-warning');
+
+        // Результаты
+        const avgResultEl = document.getElementById('average-result');
+        const resUnitEl = document.getElementById('result-unit');
+        const formulaUnits = document.querySelectorAll('.formula-unit');
+        
+        const resEpley = document.getElementById('res-epley');
+        const resBrzycki = document.getElementById('res-brzycki');
+        const resLander = document.getElementById('res-lander');
+        const resOconnor = document.getElementById('res-oconnor');
+        const pctContainer = document.getElementById('percentages-container');
+
+        const percentages = [95, 90, 85, 80, 75, 70, 65, 60, 55, 50];
+
+        // Синхронизация единиц измерения
+        unit1Select.addEventListener('change', (e) => { currentUnit = e.target.value; unit2Select.value = currentUnit; calculate(); });
+        unit2Select.addEventListener('change', (e) => { currentUnit = e.target.value; unit1Select.value = currentUnit; calculate(); });
+
+        // Переключение режимов
+        tab1rm.addEventListener('click', () => {
+            currentMode = '1rm';
+            
+            tab1rm.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white transition-all";
+            tabReps.className = "flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-gray-200 transition-all";
+            
+            mode1Inputs.classList.remove('hidden');
+            mode2Inputs.classList.add('hidden');
+            
+            mainTitle.textContent = "Калькулятор 1ПМ";
+            mainSubtitle.textContent = "Узнайте свой одноповторный максимум на основе веса и количества повторений.";
+            avgLabel.textContent = "Средний 1ПМ";
+            
+            calculate();
+        });
+
+        tabReps.addEventListener('click', () => {
+            currentMode = 'reps';
+            
+            tabReps.className = "flex-1 py-2 text-sm font-medium rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white transition-all";
+            tab1rm.className = "flex-1 py-2 text-sm font-medium rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-gray-200 transition-all";
+            
+            mode2Inputs.classList.remove('hidden');
+            mode1Inputs.classList.add('hidden');
+            
+            mainTitle.textContent = "Расчет повторений";
+            mainSubtitle.textContent = "Узнайте, сколько раз вы сможете поднять определенный вес, зная свой 1ПМ.";
+            avgLabel.textContent = "Среднее кол-во повторений";
+            
+            calculate();
+        });
+
+        function initPercentages() {
+            pctContainer.innerHTML = '';
+            percentages.forEach(pct => {
+                const card = document.createElement('div');
+                card.className = 'bg-white/40 dark:bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center border border-slate-200/50 dark:border-slate-700/50 transition-colors shadow-sm dark:shadow-none';
+                
+                const pctLabel = document.createElement('div');
+                pctLabel.className = 'text-slate-500 dark:text-gray-400 text-xs font-semibold mb-1 transition-colors';
+                pctLabel.textContent = `${pct}% от 1ПМ`;
+                
+                const valLabel = document.createElement('div');
+                valLabel.className = 'font-bold text-slate-800 dark:text-white text-lg transition-colors';
+                valLabel.id = `pct-${pct}`;
+                valLabel.innerHTML = `0.0 <span class="text-xs text-slate-400 dark:text-gray-500 font-normal transition-colors">кг</span>`;
+
+                card.appendChild(pctLabel);
+                card.appendChild(valLabel);
+                pctContainer.appendChild(card);
+            });
+        }
+
+        function calculate() {
+            const unitLabel = currentUnit === 'kg' ? 'кг' : 'фунты';
+            
+            if (currentMode === '1rm') {
+                resUnitEl.textContent = unitLabel;
+                formulaUnits.forEach(el => el.textContent = unitLabel);
+
+                const wVal = parseFloat(weightInput.value);
+                const rVal = parseInt(repsInput.value, 10);
+
+                if (!wVal || isNaN(wVal) || !rVal || isNaN(rVal) || rVal < 1) {
+                    resetValues(unitLabel, false);
+                    return;
+                }
+
+                if (rVal === 1) {
+                    repsWarning.classList.remove('hidden');
+                    updateUI(wVal, wVal, wVal, wVal, unitLabel, wVal, false);
+                } else {
+                    repsWarning.classList.add('hidden');
+                    
+                    const epley = (wVal * rVal) / 30 + wVal;
+                    const brzycki = wVal * (36 / (37 - rVal));
+                    const lander = (100 * wVal) / (101.3 - 2.67123 * rVal);
+                    const oconnor = wVal * (1 + 0.025 * rVal);
+
+                    updateUI(epley, brzycki, lander, oconnor, unitLabel, null, false);
+                }
+            } else {
+                // Режим расчета повторений
+                resUnitEl.textContent = 'повт.';
+                formulaUnits.forEach(el => el.textContent = 'повт.');
+
+                const maxVal = parseFloat(maxWeightInput.value);
+                const targetVal = parseFloat(targetWeightInput.value);
+
+                if (!maxVal || isNaN(maxVal)) {
+                    resetValues('повт.', true);
+                    return;
+                }
+
+                if (!targetVal || isNaN(targetVal) || targetVal <= 0) {
+                    resetValues('повт.', true);
+                    updatePercentages(maxVal, unitLabel);
+                    return;
+                }
+
+                if (targetVal >= maxVal) {
+                    targetWarning.classList.remove('hidden');
+                    updateUI(1, 1, 1, 1, 'повт.', maxVal, true);
+                } else {
+                    targetWarning.classList.add('hidden');
+
+                    // Реверс формул для поиска k (повторений)
+                    let epleyReps = 30 * (maxVal - targetVal) / targetVal;
+                    let brzyckiReps = 37 - (36 * targetVal / maxVal);
+                    let landerReps = (101.3 - (100 * targetVal / maxVal)) / 2.67123;
+                    let oconnorReps = 40 * (maxVal / targetVal - 1);
+
+                    // Ограничиваем минимум 1 повторением
+                    epleyReps = Math.max(1, epleyReps);
+                    brzyckiReps = Math.max(1, brzyckiReps);
+                    landerReps = Math.max(1, landerReps);
+                    oconnorReps = Math.max(1, oconnorReps);
+
+                    updateUI(epleyReps, brzyckiReps, landerReps, oconnorReps, 'повт.', maxVal, true);
+                }
+            }
+        }
+
+        function updateUI(epley, brzycki, lander, oconnor, unitLabel, oneRmForPct, isRepsMode) {
+            resEpley.textContent = epley.toFixed(1);
+            resBrzycki.textContent = brzycki.toFixed(1);
+            resLander.textContent = lander.toFixed(1);
+            resOconnor.textContent = oconnor.toFixed(1);
+
+            const avg = (epley + brzycki + lander + oconnor) / 4;
+            
+            if (isRepsMode) {
+                avgResultEl.textContent = Math.round(avg); // Для повторений округляем до целых
+                if (oneRmForPct) {
+                    updatePercentages(oneRmForPct, currentUnit === 'kg' ? 'кг' : 'фунты');
+                }
+            } else {
+                avgResultEl.textContent = avg.toFixed(1);
+                updatePercentages(avg, currentUnit === 'kg' ? 'кг' : 'фунты');
+            }
+        }
+
+        function updatePercentages(oneRm, unitLabel) {
+            percentages.forEach(pct => {
+                const el = document.getElementById(`pct-${pct}`);
+                if (el) {
+                    const pctValue = (oneRm * (pct / 100)).toFixed(1);
+                    el.innerHTML = `${pctValue} <span class="text-xs text-emerald-600/80 dark:text-emerald-500/70 font-normal transition-colors">${unitLabel}</span>`;
+                }
+            });
+        }
+
+        function resetValues(unitLabel, isRepsMode) {
+            repsWarning.classList.add('hidden');
+            targetWarning.classList.add('hidden');
+            avgResultEl.textContent = '0';
+            resEpley.textContent = '0.0';
+            resBrzycki.textContent = '0.0';
+            resLander.textContent = '0.0';
+            resOconnor.textContent = '0.0';
+            
+            if (!isRepsMode) {
+                updatePercentages(0, currentUnit === 'kg' ? 'кг' : 'фунты');
+            }
+        }
+
+        // Слушатели событий
+        weightInput.addEventListener('input', calculate);
+        repsInput.addEventListener('input', calculate);
+        maxWeightInput.addEventListener('input', calculate);
+        targetWeightInput.addEventListener('input', calculate);
+
+        // Инициализация при загрузке
+        initPercentages();
+        calculate();
+    </script>
+</body>
+</html>
