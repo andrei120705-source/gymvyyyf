@@ -1,12 +1,15 @@
 {
-  "name": "Антигравити Дневник Тренировок",
-  "short_name": "Антигравити PRO",
-  "start_url": "./",
+  "name": "Проект Атлант Дневник Тренировок",
+  "short_name": "Проект Атлант PRO",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#00f2fe",
   "background_color": "#060814",
-  "description": "Специализированный мобильный дневник тренировок по системе Антигравити и АэроЙоге",
-  "categories": ["health", "fitness"],
+  "description": "Специализированный мобильный дневник тренировок по системе Проект Атлант и АэроЙоге",
+  "categories": [
+    "health",
+    "fitness"
+  ],
   "icons": [
     {
       "src": "icon-72x72.png",
